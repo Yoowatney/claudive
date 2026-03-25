@@ -3,22 +3,45 @@ import { createElement } from "react";
 import { render } from "ink";
 import updateNotifier from "update-notifier";
 import App from "./app.js";
+import ErrorBoundary from "./components/ErrorBoundary.js";
 
-const ISSUES_URL = "https://github.com/Yoowatney/claude-dash/issues";
+const ISSUES_URL = "https://github.com/Yoowatney/claude-dash/issues/new";
+
+function showCrashMessage(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  const title = encodeURIComponent(`Bug: ${msg.slice(0, 80)}`);
+
+  // Unmount Ink first so it doesn't clear our output
+  if (inkInstance) {
+    inkInstance.unmount();
+    inkInstance.cleanup();
+  }
+
+  process.stderr.write("\n");
+  process.stderr.write("  \x1b[31m\x1b[1mclaude-dash crashed\x1b[0m\n");
+  process.stderr.write("\n");
+  process.stderr.write(`  ${msg}\n`);
+  process.stderr.write("\n");
+  process.stderr.write("  \x1b[33mPlease report this issue:\x1b[0m\n");
+  process.stderr.write(`  \x1b[36m${ISSUES_URL}?title=${title}\x1b[0m\n`);
+  process.stderr.write("\n");
+
+  if (err instanceof Error && err.stack) {
+    const stackLines = err.stack.split("\n").slice(1, 5);
+    process.stderr.write("  \x1b[2m" + stackLines.join("\n  ") + "\x1b[0m\n");
+    process.stderr.write("\n");
+  }
+}
+
+let inkInstance: ReturnType<typeof render> | null = null;
 
 process.on("uncaughtException", (err) => {
-  console.error(`\n\x1b[31m claude-dash crashed:\x1b[0m ${err.message}\n`);
-  console.error(`  Please report this issue:`);
-  console.error(`  \x1b[36m${ISSUES_URL}/new?title=${encodeURIComponent(`Crash: ${err.message}`)}\x1b[0m\n`);
-  console.error(`  ${err.stack}\n`);
+  showCrashMessage(err);
   process.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
-  const msg = reason instanceof Error ? reason.message : String(reason);
-  console.error(`\n\x1b[31m claude-dash error:\x1b[0m ${msg}\n`);
-  console.error(`  Please report this issue:`);
-  console.error(`  \x1b[36m${ISSUES_URL}/new?title=${encodeURIComponent(`Error: ${msg}`)}\x1b[0m\n`);
+  showCrashMessage(reason);
   process.exit(1);
 });
 
@@ -43,9 +66,13 @@ const updateInfo =
     ? { current: pkg.version, latest: notifier.update.latest }
     : null;
 
-render(
-  createElement(App, {
-    version: pkg.version,
-    updateInfo,
-  }),
+inkInstance = render(
+  createElement(
+    ErrorBoundary,
+    null,
+    createElement(App, {
+      version: pkg.version,
+      updateInfo,
+    }),
+  ),
 );
