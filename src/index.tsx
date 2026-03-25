@@ -4,23 +4,21 @@ import { render } from "ink";
 import updateNotifier from "update-notifier";
 import App from "./app.js";
 
-// Check for updates (runs in background, notifies on next run)
-const pkg = {
-  name: "@yoyoyoyoo/claude-dash",
-  version: process.env["npm_package_version"] || "0.0.0",
-};
-
+// Read package version
+let pkg = { name: "@yoyoyoyoo/claude-dash", version: "0.0.0" };
 try {
-  // Dynamic import of package.json at runtime
   const { createRequire } = await import("node:module");
   const require = createRequire(import.meta.url);
-  const pkgJson = require("../package.json") as { name: string; version: string };
-  pkg.name = pkgJson.name;
-  pkg.version = pkgJson.version;
+  pkg = require("../package.json") as typeof pkg;
 } catch {
   // ignore
 }
 
-updateNotifier({ pkg }).notify();
+// Check for updates and notify
+const notifier = updateNotifier({ pkg, updateCheckInterval: 0 });
+if (!notifier.update) {
+  await notifier.fetchInfo?.();
+}
+notifier.notify();
 
 render(createElement(App));
