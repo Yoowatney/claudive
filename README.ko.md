@@ -6,15 +6,16 @@
 
 [English](README.md) | [한국어](README.ko.md)
 
-## 왜 만들었나?
+## 기능
 
-Claude Code는 프로젝트 디렉토리별로 세션을 보여줍니다. 여러 프로젝트를 넘나들며 작업하는 사람에겐 전체 세션을 볼 수 없다란 문제점이 있습니다.
-
-**claude-dash**는:
-- 모든 프로젝트의 세션을 한 화면에
-- 대화 내용 미리보기 (word wrap 지원)
-- 세션 재개 (현재는 iTerm2+tmux 환경만 지원하고 있습니다)
-- Vim 스타일 네비게이션 (`j/k`, `/` 검색, `g/G`)
+- **모든 세션을 한 화면에** — 프로젝트 구분 없이 전체 세션 조회
+- **전체 대화 내용 검색** — 제목뿐 아니라 대화 내용까지 검색
+- **대화 미리보기** — word wrap과 vim 스타일 스크롤로 전체 대화 확인
+- **세션 재개** — Enter 한 번으로 바로 세션 이어서 작업
+- **북마크** — 중요한 세션에 별표 표시
+- **프로젝트 필터링** — 특정 프로젝트 세션만 필터링
+- **세션 정리** — 불필요한 세션 삭제
+- **터미널 자동 감지** — tmux, iTerm2, Terminal.app 등 지원
 
 ## 설치
 
@@ -36,16 +37,16 @@ claude-dash
 ```
 claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
 
-[Sessions]  [Projects]
+[Sessions]  [Projects]  [Bookmarks 3]
 
 ▶ my-app         로그인 버그 수정하고 테스트 추가해줘...        2m ago
-  api-server     /api/v2 엔드포인트에 rate limiting 추가...   3h ago
+★ api-server     /api/v2 엔드포인트에 rate limiting 추가...   3h ago
   docs           v2 설치 가이드 업데이트...                     1d ago
   my-app         auth 미들웨어 리팩토링...                      2d ago
   infra          GitHub Actions으로 CI/CD 파이프라인 구축...    5d ago
 
 42 sessions | 1/42
-[Enter] resume  [p] preview  [/] search  [Tab] switch view  [j/k] navigate  [q] quit
+[Enter] resume  [p] preview  [b] bookmark  [d] delete  [/] search  [Tab] next  [q] quit
 ```
 
 ### 미리보기 모드
@@ -73,9 +74,11 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 | `j` / `k` / `↑` / `↓` | 세션 탐색 |
 | `Enter` | 선택한 세션 재개 |
 | `p` | 대화 미리보기 |
-| `/` | 검색 / 필터 |
-| `Tab` | 세션 / 프로젝트 뷰 전환 |
-| `q` / `Esc` | 종료 |
+| `b` | 북마크 토글 |
+| `d` | 세션 삭제 (확인 후) |
+| `/` | 검색 (제목 + 대화 내용) |
+| `Tab` / `Shift+Tab` | 뷰 전환: Sessions → Projects → Bookmarks |
+| `q` / `Esc` | 종료 (또는 필터 해제) |
 
 #### 미리보기 모드
 
@@ -92,23 +95,28 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 
 | 환경 | 동작 | 상태 |
 |------|------|------|
+| 모든 터미널 (기본) | 같은 터미널에서 재개 | 지원 |
 | tmux 안 | tmux 새 윈도우로 열기 | 지원 |
-| macOS + iTerm2 (tmux 없이) | iTerm2 새 탭으로 열기 | 지원 |
-| 기타 터미널 | 재개 명령어 출력 | 폴백 |
-
-> **참고:** Terminal.app, Ghostty, Kitty, Alacritty, WezTerm 등은 아직 네이티브 지원 안 됩니다.
+| macOS + iTerm2 | iTerm2 새 탭으로 열기 | 지원 |
+| macOS + Terminal.app | Terminal 새 윈도우로 열기 | 지원 |
 
 설정 파일 위치: `~/.config/claudash/config.json`
 
 ```json
 {
-  "launchMode": "tmux"
+  "launchMode": "inline"
 }
 ```
+
+옵션: `"inline"` (기본), `"tmux"`, `"iterm2-tab"`, `"terminal-app"`, `"print"`
 
 ## 작동 방식
 
 `~/.claude/projects/`의 로컬 세션 데이터를 읽습니다. **어디에도 데이터를 전송하지 않습니다.**
+
+- 세션 데이터: `~/.claude/projects/<project>/<session-id>.jsonl`
+- 북마크: `~/.config/claudash/bookmarks.json`
+- 설정: `~/.config/claudash/config.json`
 
 ## 요구 사항
 

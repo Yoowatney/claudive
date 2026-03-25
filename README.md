@@ -6,15 +6,16 @@ Browse, search, preview, and resume your Claude Code sessions across **all proje
 
 [English](README.md) | [한국어](README.ko.md)
 
-## Why?
+## Features
 
-Claude Code shows sessions per-project. If you work across multiple projects, there's no single place to see everything.
-
-**claude-dash** gives you:
-- All sessions from all projects in one view
-- Full conversation preview (word wrap supported)
-- Session resume (currently supports iTerm2 + tmux environments)
-- Vim-style navigation (`j/k`, `/` search, `g/G`)
+- **All sessions, one view** — See every session across all projects
+- **Full-text search** — Search through conversation content, not just titles
+- **Conversation preview** — Read full conversations with word wrap and vim-style scrolling
+- **Session resume** — Press Enter to resume any session in your terminal
+- **Bookmarks** — Star important sessions for quick access
+- **Project filtering** — Filter sessions by project
+- **Session cleanup** — Delete old sessions you no longer need
+- **Auto-detect terminal** — Works with tmux, iTerm2, Terminal.app, and any terminal
 
 ## Install
 
@@ -36,16 +37,16 @@ claude-dash
 ```
 claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
 
-[Sessions]  [Projects]
+[Sessions]  [Projects]  [Bookmarks 3]
 
 ▶ my-app         Fix the login bug and add tests...           2m ago
-  api-server     Add rate limiting to /api/v2 endpoints...   3h ago
+★ api-server     Add rate limiting to /api/v2 endpoints...   3h ago
   docs           Update installation guide for v2...          1d ago
   my-app         Refactor auth middleware...                   2d ago
   infra          Set up CI/CD pipeline with GitHub Actions...  5d ago
 
 42 sessions | 1/42
-[Enter] resume  [p] preview  [/] search  [Tab] switch view  [j/k] navigate  [q] quit
+[Enter] resume  [p] preview  [b] bookmark  [d] delete  [/] search  [Tab] next  [q] quit
 ```
 
 ### Preview Mode
@@ -74,9 +75,11 @@ AI:   Found the issue - the token expiry was set to 24h
 | `j` / `k` / `↑` / `↓` | Navigate sessions |
 | `Enter` | Resume selected session |
 | `p` | Preview conversation |
-| `/` | Search / filter sessions |
-| `Tab` | Switch between Sessions / Projects view |
-| `q` / `Esc` | Quit |
+| `b` | Toggle bookmark |
+| `d` | Delete session (with confirmation) |
+| `/` | Search (titles + conversation content) |
+| `Tab` / `Shift+Tab` | Cycle views: Sessions → Projects → Bookmarks |
+| `q` / `Esc` | Quit (or clear filter) |
 
 #### Preview Mode
 
@@ -93,23 +96,28 @@ Pressing `Enter` auto-detects your terminal environment:
 
 | Environment | Behavior | Status |
 |-------------|----------|--------|
+| Any terminal (default) | Resumes in same terminal | Supported |
 | Inside tmux | Opens new tmux window | Supported |
-| macOS + iTerm2 (no tmux) | Opens new iTerm2 tab | Supported |
-| Other terminals | Prints the resume command | Fallback |
-
-> **Note:** Terminal.app, Ghostty, Kitty, Alacritty, WezTerm, etc. are not yet natively supported.
+| macOS + iTerm2 | Opens new iTerm2 tab | Supported |
+| macOS + Terminal.app | Opens new Terminal window | Supported |
 
 Config is saved at `~/.config/claudash/config.json`:
 
 ```json
 {
-  "launchMode": "tmux"
+  "launchMode": "inline"
 }
 ```
+
+Options: `"inline"` (default), `"tmux"`, `"iterm2-tab"`, `"terminal-app"`, `"print"`
 
 ## How It Works
 
 Reads session data from `~/.claude/projects/` — the same local data Claude Code uses. **Nothing is sent anywhere.**
+
+- Session data: `~/.claude/projects/<project>/<session-id>.jsonl`
+- Bookmarks: `~/.config/claudash/bookmarks.json`
+- Config: `~/.config/claudash/config.json`
 
 ## Requirements
 
