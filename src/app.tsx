@@ -13,7 +13,7 @@ import { resumeSession } from "./lib/launcher.js";
 import { toggleBookmark, getBookmarkedIds } from "./lib/bookmarks.js";
 import type { Session, ProjectSummary } from "./lib/scanner.js";
 
-type View = "sessions" | "projects";
+type View = "sessions" | "projects" | "bookmarks";
 
 export default function App() {
   const { exit } = useApp();
@@ -116,12 +116,26 @@ export default function App() {
       setSearchMode(true);
     }
     if (key.tab) {
-      setView((v) => (v === "sessions" ? "projects" : "sessions"));
+      setView((v) =>
+        v === "sessions"
+          ? "projects"
+          : v === "projects"
+            ? "bookmarks"
+            : "sessions",
+      );
     }
-    if (input === "p" && selectedSession && view === "sessions") {
+    if (
+      input === "p" &&
+      selectedSession &&
+      (view === "sessions" || view === "bookmarks")
+    ) {
       setShowPreview(true);
     }
-    if (input === "b" && selectedSession && view === "sessions") {
+    if (
+      input === "b" &&
+      selectedSession &&
+      (view === "sessions" || view === "bookmarks")
+    ) {
       toggleBookmark(selectedSession.id);
       setBookmarkedIds(getBookmarkedIds());
     }
@@ -198,6 +212,12 @@ export default function App() {
         >
           [Projects]
         </Text>
+        <Text
+          bold={view === "bookmarks"}
+          color={view === "bookmarks" ? "yellow" : "gray"}
+        >
+          [Bookmarks{bookmarkedIds.size > 0 ? ` ${bookmarkedIds.size}` : ""}]
+        </Text>
         {projectFilter && <Text color="yellow"> ~ {projectFilter}</Text>}
       </Box>
 
@@ -222,6 +242,17 @@ export default function App() {
         />
       )}
 
+      {/* Bookmarks view */}
+      {view === "bookmarks" && (
+        <SessionList
+          sessions={sessions.filter((s) => bookmarkedIds.has(s.id))}
+          onSelect={handleSelect}
+          onCursorChange={handleCursorChange}
+          filter={filter}
+          bookmarkedIds={bookmarkedIds}
+        />
+      )}
+
       {/* Search bar */}
       {searchMode && (
         <Box marginTop={1}>
@@ -238,9 +269,11 @@ export default function App() {
             ? "[Esc] cancel  (searches titles + conversation content)"
             : view === "sessions"
               ? projectFilter
-                ? "[Enter] resume  [p] preview  [b] bookmark  [/] search  [Tab] projects  [q] clear filter"
-                : "[Enter] resume  [p] preview  [b] bookmark  [/] search  [Tab] projects  [j/k] navigate  [q] quit"
-              : "[Enter] filter  [Tab] sessions  [j/k] navigate  [q] quit"}
+                ? "[Enter] resume  [p] preview  [b] bookmark  [/] search  [Tab] next  [q] clear filter"
+                : "[Enter] resume  [p] preview  [b] bookmark  [/] search  [Tab] next  [q] quit"
+              : view === "bookmarks"
+                ? "[Enter] resume  [p] preview  [b] unbookmark  [Tab] next  [q] quit"
+                : "[Enter] filter  [Tab] next  [j/k] navigate  [q] quit"}
         </Text>
       </Box>
     </Box>
