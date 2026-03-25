@@ -1,0 +1,47 @@
+{
+  "name": "@yoyoyoyoo/claude-dash",
+  "version": "0.1.1",
+  "description": "Interactive TUI dashboard for Claude Code sessions. Browse, search, preview, and resume sessions across all projects.",
+  "type": "module",
+  "bin": {
+    "claude-dash": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "tui",
+    "dashboard",
+    "terminal",
+    "sessions",
+    "ai",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yoowatney/claude-dash"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ink": "^6.8.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^6.0.2"
+  }
+}
