@@ -1,6 +1,6 @@
 {
   "name": "@yoyoyoyoo/claude-dash",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Interactive TUI dashboard for Claude Code sessions. Browse, search, preview, and resume sessions across all projects.",
   "type": "module",
   "bin": {
@@ -38,7 +38,8 @@
     "@yoyoyoyoo/claude-dash": "^0.1.7",
     "ink": "^6.8.0",
     "ink-text-input": "^6.0.0",
-    "react": "^19.2.4"
+    "react": "^19.2.4",
+    "update-notifier": "^7.3.1"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
