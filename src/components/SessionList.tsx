@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Box, Text, useInput } from "ink";
 import type { Session } from "../lib/scanner.js";
 
 interface Props {
   sessions: Session[];
+  cursor: number;
+  onCursorChange: (cursor: number) => void;
   onSelect: (session: Session) => void;
-  onCursorChange: (session: Session) => void;
   filter: string;
   bookmarkedIds: Set<string>;
 }
@@ -26,33 +27,25 @@ function timeAgo(date: Date): string {
 
 export default function SessionList({
   sessions,
-  onSelect,
+  cursor,
   onCursorChange,
+  onSelect,
   filter,
   bookmarkedIds,
 }: Props) {
-  const [cursor, setCursor] = useState(0);
-
-  // Reset cursor when sessions change (e.g. filter applied)
+  // Clamp cursor if sessions shrink (e.g. after delete)
   useEffect(() => {
-    setCursor(0);
-    if (sessions[0]) onCursorChange(sessions[0]);
+    if (cursor >= sessions.length && sessions.length > 0) {
+      onCursorChange(sessions.length - 1);
+    }
   }, [sessions.length]);
 
   useInput((input, key) => {
     if (key.upArrow || (input === "k" && !filter)) {
-      setCursor((c) => {
-        const next = Math.max(0, c - 1);
-        if (sessions[next]) onCursorChange(sessions[next]);
-        return next;
-      });
+      onCursorChange(Math.max(0, cursor - 1));
     }
     if (key.downArrow || (input === "j" && !filter)) {
-      setCursor((c) => {
-        const next = Math.min(sessions.length - 1, c + 1);
-        if (sessions[next]) onCursorChange(sessions[next]);
-        return next;
-      });
+      onCursorChange(Math.min(sessions.length - 1, cursor + 1));
     }
     if (key.return && sessions[cursor]) {
       onSelect(sessions[cursor]);

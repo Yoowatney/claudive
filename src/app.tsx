@@ -38,6 +38,7 @@ export default function App() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [sessionCursor, setSessionCursor] = useState(0);
 
   useEffect(() => {
     setBookmarkedIds(getBookmarkedIds());
@@ -201,8 +202,11 @@ export default function App() {
     }, 100);
   };
 
-  const handleCursorChange = (session: Session) => {
-    setSelectedSession(session);
+  const handleCursorChange = (cursorIdx: number) => {
+    setSessionCursor(cursorIdx);
+    if (filteredSessions[cursorIdx]) {
+      setSelectedSession(filteredSessions[cursorIdx]);
+    }
   };
 
   const handleProjectSelect = (project: ProjectSummary) => {
@@ -296,8 +300,9 @@ export default function App() {
       {view === "sessions" && (
         <SessionList
           sessions={filteredSessions}
-          onSelect={handleSelect}
+          cursor={sessionCursor}
           onCursorChange={handleCursorChange}
+          onSelect={handleSelect}
           filter={filter}
           bookmarkedIds={bookmarkedIds}
         />
@@ -307,8 +312,9 @@ export default function App() {
       {view === "bookmarks" && (
         <SessionList
           sessions={sessions.filter((s) => bookmarkedIds.has(s.id))}
-          onSelect={handleSelect}
+          cursor={sessionCursor}
           onCursorChange={handleCursorChange}
+          onSelect={handleSelect}
           filter={filter}
           bookmarkedIds={bookmarkedIds}
         />
