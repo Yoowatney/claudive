@@ -14,11 +14,22 @@ try {
   // ignore
 }
 
-// Check for updates and notify
+// Check for updates
 const notifier = updateNotifier({ pkg, updateCheckInterval: 0 });
 if (!notifier.update) {
-  await notifier.fetchInfo?.();
+  await notifier.fetchInfo();
 }
-notifier.notify();
+
+// Show update status
+if (notifier.update && notifier.update.latest !== pkg.version) {
+  console.log(
+    `\x1b[33m Update available: ${pkg.version} → ${notifier.update.latest}\x1b[0m`,
+  );
+  console.log(
+    `\x1b[33m Run: npm i -g @yoyoyoyoo/claude-dash\x1b[0m\n`,
+  );
+} else {
+  console.log(`\x1b[32m claude-dash v${pkg.version} (latest)\x1b[0m\n`);
+}
 
 render(createElement(App));
