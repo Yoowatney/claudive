@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-type LaunchMode = "tmux" | "iterm2-tab" | "print";
+type LaunchMode = "tmux" | "iterm2-tab" | "terminal-app" | "print";
 
 interface Config {
   launchMode: LaunchMode;
@@ -20,17 +20,24 @@ function loadConfig(): Config {
     // ignore
   }
 
-  // Auto-detect default
   const mode = detectMode();
   saveConfig({ launchMode: mode });
   return { launchMode: mode };
 }
 
 function detectMode(): LaunchMode {
-  // If inside tmux, use tmux
   if (process.env["TMUX"]) return "tmux";
-  // If on macOS and iTerm2 is available, use it
-  if (process.platform === "darwin") return "iterm2-tab";
+  if (process.platform === "darwin") {
+    // Check which terminal is running
+    try {
+      const termProgram = process.env["TERM_PROGRAM"] || "";
+      if (termProgram === "iTerm.app") return "iterm2-tab";
+      if (termProgram === "Apple_Terminal") return "terminal-app";
+    } catch {
+      // ignore
+    }
+    return "iterm2-tab";
+  }
   return "print";
 }
 
@@ -71,7 +78,21 @@ function launchIterm2Tab(sessionId: string, projectPath: string): void {
   try {
     execSync(`osascript -e '${script}'`);
   } catch {
-    // Fallback to print
+    console.log(`\nRun manually:`);
+    console.log(`  cd "${projectPath}" && claude --resume "${sessionId}"\n`);
+  }
+}
+
+function launchTerminalApp(sessionId: string, projectPath: string): void {
+  const script = `
+    tell application "Terminal"
+      activate
+      do script "cd \\"${projectPath}\\" && claude --resume \\"${sessionId}\\""
+    end tell
+  `;
+  try {
+    execSync(`osascript -e '${script}'`);
+  } catch {
     console.log(`\nRun manually:`);
     console.log(`  cd "${projectPath}" && claude --resume "${sessionId}"\n`);
   }
@@ -87,9 +108,14 @@ export function resumeSession(sessionId: string, projectPath: string): void {
     case "iterm2-tab":
       launchIterm2Tab(sessionId, projectPath);
       break;
+    case "terminal-app":
+      launchTerminalApp(sessionId, projectPath);
+      break;
     case "print":
     default:
-      console.log(`\n  cd "${projectPath}" && claude --resume "${sessionId}"\n`);
+      console.log(
+        `\n  cd "${projectPath}" && claude --resume "${sessionId}"\n`,
+      );
       break;
   }
 }
