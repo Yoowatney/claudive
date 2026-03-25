@@ -32,6 +32,7 @@ function projectDisplayName(encoded: string): string {
 }
 
 function extractText(content: unknown): string {
+  if (content == null) return "";
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
     return content
@@ -42,7 +43,7 @@ function extractText(content: unknown): string {
       .filter(Boolean)
       .join(" ");
   }
-  return "";
+  return String(content);
 }
 
 async function parseFirstUserMessage(filePath: string): Promise<string> {
