@@ -6,6 +6,7 @@ import ProjectList from "./components/ProjectList.js";
 import Preview from "./components/Preview.js";
 import Settings from "./components/Settings.js";
 import Help from "./components/Help.js";
+import SkillList from "./components/SkillList.js";
 import {
   scanSessions,
   groupByProject,
@@ -17,7 +18,7 @@ import { toggleBookmark, getBookmarkedIds } from "./lib/bookmarks.js";
 import { getFooterText } from "./lib/keybindings.js";
 import type { Session, ProjectSummary } from "./lib/scanner.js";
 
-type View = "sessions" | "projects" | "bookmarks";
+type View = "sessions" | "projects" | "bookmarks" | "skills";
 
 interface AppProps {
   version: string;
@@ -156,10 +157,12 @@ export default function App({ version, updateInfo }: AppProps) {
     if (key.tab && key.shift) {
       setView((v) =>
         v === "sessions"
-          ? "bookmarks"
-          : v === "bookmarks"
-            ? "projects"
-            : "sessions",
+          ? "skills"
+          : v === "skills"
+            ? "bookmarks"
+            : v === "bookmarks"
+              ? "projects"
+              : "sessions",
       );
     } else if (key.tab) {
       setView((v) =>
@@ -167,7 +170,9 @@ export default function App({ version, updateInfo }: AppProps) {
           ? "projects"
           : v === "projects"
             ? "bookmarks"
-            : "sessions",
+            : v === "bookmarks"
+              ? "skills"
+              : "sessions",
       );
     }
     if (
@@ -293,6 +298,12 @@ export default function App({ version, updateInfo }: AppProps) {
         >
           [Bookmarks{bookmarkedIds.size > 0 ? ` ${bookmarkedIds.size}` : ""}]
         </Text>
+        <Text
+          bold={view === "skills"}
+          color={view === "skills" ? "magenta" : "gray"}
+        >
+          [Skills]
+        </Text>
         {projectFilter && <Text color="yellow"> ~ {projectFilter}</Text>}
       </Box>
 
@@ -328,6 +339,11 @@ export default function App({ version, updateInfo }: AppProps) {
           filter={filter}
           bookmarkedIds={bookmarkedIds}
         />
+      )}
+
+      {/* Skills view */}
+      {view === "skills" && (
+        <SkillList onExit={() => setView("sessions")} />
       )}
 
       {/* Search bar */}

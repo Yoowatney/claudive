@@ -1,16 +1,17 @@
 export interface Keybinding {
   key: string;
   action: string;
-  views: ("sessions" | "projects" | "bookmarks" | "preview" | "global")[];
+  views: ("sessions" | "projects" | "bookmarks" | "skills" | "preview" | "global")[];
   showInFooter?: boolean;
 }
 
 const keybindings: Keybinding[] = [
-  { key: "j/k", action: "Navigate", views: ["sessions", "projects", "bookmarks", "preview"], showInFooter: true },
+  { key: "j/k", action: "Navigate", views: ["sessions", "projects", "bookmarks", "skills", "preview"], showInFooter: true },
   { key: "Enter", action: "Resume", views: ["sessions", "bookmarks"], showInFooter: true },
   { key: "Enter", action: "Select", views: ["projects"], showInFooter: true },
-  { key: "p", action: "Preview", views: ["sessions", "bookmarks"], showInFooter: true },
+  { key: "p", action: "Preview", views: ["sessions", "bookmarks", "skills"], showInFooter: true },
   { key: "p/Esc", action: "Back", views: ["preview"], showInFooter: true },
+  { key: "e", action: "Edit", views: ["skills"], showInFooter: true },
   { key: "b", action: "Bookmark", views: ["sessions", "bookmarks"], showInFooter: true },
   { key: "d", action: "Delete", views: ["sessions", "bookmarks"] },
   { key: "/", action: "Search", views: ["sessions"], showInFooter: true },
@@ -28,7 +29,7 @@ export function getKeybindings(): Keybinding[] {
 }
 
 export function getKeybindingsForView(
-  view: "sessions" | "projects" | "bookmarks" | "preview",
+  view: "sessions" | "projects" | "bookmarks" | "skills" | "preview",
 ): Keybinding[] {
   return keybindings.filter(
     (k) => k.views.includes(view) || k.views.includes("global"),
@@ -36,7 +37,7 @@ export function getKeybindingsForView(
 }
 
 export function getFooterText(
-  view: "sessions" | "projects" | "bookmarks",
+  view: "sessions" | "projects" | "bookmarks" | "skills",
 ): string {
   return keybindings
     .filter(
