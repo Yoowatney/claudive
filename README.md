@@ -105,7 +105,7 @@ Pressing `Enter` auto-detects your terminal environment:
 | macOS + iTerm2 | Opens new iTerm2 tab | Supported |
 | macOS + Terminal.app | Opens new Terminal window | Supported |
 
-Config is saved at `~/.config/claudash/config.json`:
+You can change the launch mode in Settings (`s` key) or by editing `~/.config/claudash/config.json`:
 
 ```json
 {
@@ -113,7 +113,13 @@ Config is saved at `~/.config/claudash/config.json`:
 }
 ```
 
-Options: `"inline"` (default), `"tmux"`, `"iterm2-tab"`, `"terminal-app"`, `"print"`
+| Mode | Behavior |
+|------|----------|
+| `inline` | Resume in same terminal (default) |
+| `tmux` | Open new tmux window |
+| `iterm2-tab` | Open new iTerm2 tab |
+| `terminal-app` | Open new Terminal.app window |
+| `print` | Print the resume command only |
 
 ## How It Works
 

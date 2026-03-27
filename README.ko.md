@@ -104,13 +104,21 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 | macOS + iTerm2 | iTerm2 새 탭으로 열기 | 지원 |
 | macOS + Terminal.app | Terminal 새 윈도우로 열기 | 지원 |
 
-설정 파일 위치: `~/.config/claudash/config.json`
+설정(`s` 키) 또는 `~/.config/claudash/config.json`에서 launch mode를 변경할 수 있습니다:
 
 ```json
 {
   "launchMode": "inline"
 }
 ```
+
+| 모드 | 동작 |
+|------|------|
+| `inline` | 같은 터미널에서 재개 (기본) |
+| `tmux` | tmux 새 윈도우로 열기 |
+| `iterm2-tab` | iTerm2 새 탭으로 열기 |
+| `terminal-app` | Terminal.app 새 윈도우로 열기 |
+| `print` | 재개 명령어만 출력 |
 
 옵션: `"inline"` (기본), `"tmux"`, `"iterm2-tab"`, `"terminal-app"`, `"print"`
 
