@@ -98,7 +98,7 @@ export default function SkillList({ onExit }: Props) {
       })}
       <Box marginTop={1}>
         <Text dimColor>
-          {skills.length} skills | [p] preview  [e] edit  [j/k] navigate
+          {skills.length} skills | {cursor + 1}/{skills.length}
         </Text>
       </Box>
     </Box>
