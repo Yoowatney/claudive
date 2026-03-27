@@ -1,6 +1,6 @@
-# claude-dash
+# claudive
 
-[Claude Code](https://claude.ai/claude-code) 세션을 위한 인터랙티브 TUI 대시보드.
+[Claude Code](https://claude.ai/claude-code) 세션 속으로 다이브.
 
 모든 프로젝트의 Claude Code 세션을 하나의 터미널에서 검색, 미리보기, 재개할 수 있습니다.
 
@@ -20,14 +20,14 @@
 ## 설치
 
 ```bash
-npx @yoyoyoyoo/claude-dash
+npx claudive
 ```
 
 또는 글로벌 설치:
 
 ```bash
-npm install -g @yoyoyoyoo/claude-dash
-claude-dash
+npm install -g claudive
+claudive
 ```
 
 ## 사용법
@@ -35,7 +35,7 @@ claude-dash
 ### 세션 목록
 
 ```
-claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
+claudive — Dive into your Claude Code sessions  (42 sessions, 5 projects)
 
 [Sessions]  [Projects]  [Bookmarks 3]
 
@@ -46,7 +46,7 @@ claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
   infra          GitHub Actions으로 CI/CD 파이프라인 구축...    5d ago
 
 42 sessions | 1/42
-[Enter] resume  [p] preview  [b] bookmark  [d] delete  [/] search  [Tab] next  [q] quit
+[Enter] Resume  [p] Preview  [b] Bookmark  [/] Search  [Tab] Next view  [?] Help  [q] Quit
 ```
 
 ### 미리보기 모드
@@ -78,6 +78,8 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 | `d` | 세션 삭제 (확인 후) |
 | `/` | 검색 (제목 + 대화 내용) |
 | `Tab` / `Shift+Tab` | 뷰 전환: Sessions → Projects → Bookmarks |
+| `s` | 설정 |
+| `?` | 도움말 |
 | `q` / `Esc` | 종료 (또는 필터 해제) |
 
 #### 미리보기 모드

@@ -5,7 +5,7 @@ import updateNotifier from "update-notifier";
 import App from "./app.js";
 import ErrorBoundary from "./components/ErrorBoundary.js";
 
-const ISSUES_URL = "https://github.com/Yoowatney/claude-dash/issues/new";
+const ISSUES_URL = "https://github.com/Yoowatney/claudive/issues/new";
 
 function showCrashMessage(err: unknown): void {
   const msg = err instanceof Error ? err.message : String(err);
@@ -18,7 +18,7 @@ function showCrashMessage(err: unknown): void {
   }
 
   process.stderr.write("\n");
-  process.stderr.write("  \x1b[31m\x1b[1mclaude-dash crashed\x1b[0m\n");
+  process.stderr.write("  \x1b[31m\x1b[1mclaudive crashed\x1b[0m\n");
   process.stderr.write("\n");
   process.stderr.write(`  ${msg}\n`);
   process.stderr.write("\n");

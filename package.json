@@ -1,10 +1,10 @@
 {
-  "name": "@yoyoyoyoo/claude-dash",
-  "version": "0.1.13",
-  "description": "Interactive TUI dashboard for Claude Code sessions. Browse, search, preview, and resume sessions across all projects.",
+  "name": "claudive",
+  "version": "0.1.0",
+  "description": "Dive into your Claude Code sessions. Browse, search, preview, and resume across all projects from a single terminal.",
   "type": "module",
   "bin": {
-    "claude-dash": "./dist/index.js"
+    "claudive": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -24,12 +24,13 @@
     "terminal",
     "sessions",
     "ai",
-    "cli"
+    "cli",
+    "claudive"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Yoowatney/claude-dash"
+    "url": "https://github.com/Yoowatney/claudive"
   },
   "engines": {
     "node": ">=18"

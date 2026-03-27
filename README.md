@@ -1,6 +1,6 @@
-# claude-dash
+# claudive
 
-Interactive TUI dashboard for [Claude Code](https://claude.ai/claude-code) sessions.
+Dive into your [Claude Code](https://claude.ai/claude-code) sessions.
 
 Browse, search, preview, and resume your Claude Code sessions across **all projects** from a single terminal.
 
@@ -20,14 +20,14 @@ Browse, search, preview, and resume your Claude Code sessions across **all proje
 ## Install
 
 ```bash
-npx @yoyoyoyoo/claude-dash
+npx claudive
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @yoyoyoyoo/claude-dash
-claude-dash
+npm install -g claudive
+claudive
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ claude-dash
 ### Sessions View
 
 ```
-claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
+claudive — Dive into your Claude Code sessions  (42 sessions, 5 projects)
 
 [Sessions]  [Projects]  [Bookmarks 3]
 
@@ -46,7 +46,7 @@ claudash — Claude Code Session Dashboard  (42 sessions, 5 projects)
   infra          Set up CI/CD pipeline with GitHub Actions...  5d ago
 
 42 sessions | 1/42
-[Enter] resume  [p] preview  [b] bookmark  [d] delete  [/] search  [Tab] next  [q] quit
+[Enter] Resume  [p] Preview  [b] Bookmark  [/] Search  [Tab] Next view  [?] Help  [q] Quit
 ```
 
 ### Preview Mode
@@ -79,6 +79,8 @@ AI:   Found the issue - the token expiry was set to 24h
 | `d` | Delete session (with confirmation) |
 | `/` | Search (titles + conversation content) |
 | `Tab` / `Shift+Tab` | Cycle views: Sessions → Projects → Bookmarks |
+| `s` | Settings |
+| `?` | Help |
 | `q` / `Esc` | Quit (or clear filter) |
 
 #### Preview Mode

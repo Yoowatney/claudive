@@ -258,7 +258,7 @@ export default function App({ version, updateInfo }: AppProps) {
       {/* Header */}
       <Box marginBottom={1}>
         <Text bold color="cyan">
-          claudash
+          claudive
         </Text>
         <Text dimColor> v{version}</Text>
         <Text dimColor>

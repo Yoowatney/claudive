@@ -1,7 +1,7 @@
 import { Component } from "react";
 import { Box, Text } from "ink";
 
-const ISSUES_URL = "https://github.com/Yoowatney/claude-dash/issues/new";
+const ISSUES_URL = "https://github.com/Yoowatney/claudive/issues/new";
 
 interface Props {
   children: React.ReactNode;
@@ -30,7 +30,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <Box flexDirection="column" padding={1}>
           <Text bold color="red">
-            claude-dash crashed
+            claudive crashed
           </Text>
           <Box marginTop={1}>
             <Text>{this.state.error.message}</Text>
