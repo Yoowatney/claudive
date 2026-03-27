@@ -123,6 +123,18 @@ export default function App({ version, updateInfo }: AppProps) {
       return;
     }
 
+    if (view === "skills") {
+      // Only handle tab/quit in skills view, rest is handled by SkillList
+      if (key.tab || input === "?" || input === "s") {
+        // fall through to tab/settings/help handlers below
+      } else if (input === "q") {
+        exit();
+        return;
+      } else {
+        return;
+      }
+    }
+
     if (confirmDelete && selectedSession) {
       if (input === "y" || input === "Y") {
         deleteSession(selectedSession).then((ok) => {
