@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
@@ -31,7 +30,7 @@ function load(): BookmarkData {
 function save(data: BookmarkData): void {
   const dir = join(homedir(), ".config", "claudash");
   try {
-    execSync(`mkdir -p "${dir}"`);
+    mkdirSync(dir, { recursive: true });
     writeFileSync(BOOKMARKS_PATH, JSON.stringify(data, null, 2));
   } catch {
     // ignore
