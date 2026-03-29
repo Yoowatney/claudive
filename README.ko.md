@@ -12,9 +12,10 @@
 
 - **모든 세션을 한 화면에** — 프로젝트 구분 없이 전체 세션 조회
 - **전체 대화 내용 검색** — 제목뿐 아니라 대화 내용까지 검색
-- **대화 미리보기** — word wrap과 vim 스타일 스크롤로 전체 대화 확인
-- **세션 재개** — Enter 한 번으로 바로 세션 이어서 작업
+- **대화 미리보기** — vim 스타일 스크롤로 전체 대화 확인, Enter로 바로 재개
+- **세션 재개** — Enter 한 번으로 바로 세션 이어서 작업 (스피너로 상태 표시)
 - **북마크** — 중요한 세션에 별표 표시
+- **정렬** — 최근순 또는 메시지 많은 순으로 정렬
 - **프로젝트 필터링** — 특정 프로젝트 세션만 필터링
 - **세션 정리** — 불필요한 세션 삭제
 - **터미널 자동 감지** — tmux, iTerm2, Terminal.app 등 지원
@@ -47,8 +48,8 @@ claudive — Dive into your Claude Code sessions  (42 sessions, 5 projects)
   my-app         auth 미들웨어 리팩토링...                      2d ago
   infra          GitHub Actions으로 CI/CD 파이프라인 구축...    5d ago
 
-42 sessions | 1/42
-[Enter] Resume  [p] Preview  [b] Bookmark  [/] Search  [Tab] Next view  [?] Help  [q] Quit
+42 sessions | 1/42 | ↓recent
+[Enter] Resume  [p] Preview  [o] Sort  [/] Search  [Tab] Next view  [?] Help  [q] Quit
 ```
 
 ### 미리보기 모드
@@ -66,7 +67,7 @@ You:  좋아. 세션 토큰 만료 시간도 확인해봐
 AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
       있는데 갱신 로직에서 타임존을 고려하지 않고 있었습니다...
 
-100% [j/k] line [u/d] page [g/G] top/bottom [p/Esc] back
+100% [j/k] line [u/d] page [g/G] top/bottom [Enter] resume [p/Esc] back
 ```
 
 ### 키바인딩
@@ -76,6 +77,7 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 | `j` / `k` / `↑` / `↓` | 세션 탐색 |
 | `Enter` | 선택한 세션 재개 |
 | `p` | 대화 미리보기 |
+| `o` | 정렬: 최근순 ↔ 메시지순 |
 | `b` | 북마크 토글 |
 | `d` | 세션 삭제 (확인 후) |
 | `/` | 검색 (제목 + 대화 내용) |
@@ -91,6 +93,7 @@ AI:   문제를 찾았습니다. 토큰 만료가 24시간으로 설정되어
 | `j` / `k` | 한 줄씩 스크롤 |
 | `u` / `d` | 페이지 위/아래 |
 | `g` / `G` | 맨 위/아래로 이동 |
+| `Enter` | 이 세션 재개 |
 | `p` / `Esc` | 목록으로 돌아가기 |
 
 ## 세션 재개
