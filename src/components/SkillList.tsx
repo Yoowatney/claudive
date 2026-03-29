@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Box, Text, useInput } from "ink";
 import { scanSkills, getSkillContent, editSkill } from "../lib/skills.js";
+import { useScrollable } from "../hooks/useScrollable.js";
 import type { Skill } from "../lib/skills.js";
 
 interface Props {
@@ -11,7 +12,6 @@ export default function SkillList({ onExit }: Props) {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [cursor, setCursor] = useState(0);
   const [preview, setPreview] = useState<string[] | null>(null);
-  const [previewScroll, setPreviewScroll] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,36 +24,17 @@ export default function SkillList({ onExit }: Props) {
   const termHeight = process.stdout.rows || 24;
   const maxVisible = termHeight - 7;
 
+  const closePreview = useCallback(() => setPreview(null), []);
+
+  const { scroll: previewScroll, scrollPct } = useScrollable({
+    totalLines: preview?.length ?? 0,
+    maxVisible,
+    onClose: closePreview,
+    active: preview !== null,
+  });
+
   useInput((input, key) => {
-    if (preview) {
-      if (key.escape || input === "p" || input === "q") {
-        setPreview(null);
-        setPreviewScroll(0);
-      }
-      if (key.upArrow || input === "k") {
-        setPreviewScroll((s) => Math.max(0, s - 1));
-      }
-      if (key.downArrow || input === "j") {
-        setPreviewScroll((s) =>
-          Math.min(Math.max(0, preview.length - maxVisible), s + 1),
-        );
-      }
-      if (key.pageUp || input === "u") {
-        setPreviewScroll((s) => Math.max(0, s - maxVisible));
-      }
-      if (key.pageDown || input === "d") {
-        setPreviewScroll((s) =>
-          Math.min(Math.max(0, preview.length - maxVisible), s + maxVisible),
-        );
-      }
-      if (input === "g") {
-        setPreviewScroll(0);
-      }
-      if (input === "G") {
-        setPreviewScroll(Math.max(0, preview.length - maxVisible));
-      }
-      return;
-    }
+    if (preview) return;
 
     if (key.upArrow || input === "k") {
       setCursor((c) => Math.max(0, c - 1));
@@ -64,7 +45,6 @@ export default function SkillList({ onExit }: Props) {
     if (input === "p" && skills[cursor]) {
       getSkillContent(skills[cursor]).then((content) => {
         setPreview(content.split("\n"));
-        setPreviewScroll(0);
       });
     }
     if (input === "e" && skills[cursor]) {
@@ -87,12 +67,6 @@ export default function SkillList({ onExit }: Props) {
 
   if (preview) {
     const visible = preview.slice(previewScroll, previewScroll + maxVisible);
-    const scrollPct =
-      preview.length <= maxVisible
-        ? 100
-        : Math.round(
-            (previewScroll / (preview.length - maxVisible)) * 100,
-          );
 
     return (
       <Box flexDirection="column">

@@ -1,3 +1,4 @@
+import { groupByProject } from "./scanner.js";
 import type { Session, ProjectSummary, PreviewMessage } from "./scanner.js";
 
 const now = Date.now();
@@ -87,13 +88,7 @@ export const demoSessions: Session[] = [
   },
 ];
 
-export const demoProjects: ProjectSummary[] = [
-  { name: "my-saas", path: "/Users/demo/projects/my-saas", sessionCount: 3, lastActive: hours(0.5) },
-  { name: "blog", path: "/Users/demo/projects/blog", sessionCount: 2, lastActive: hours(8) },
-  { name: "api-server", path: "/Users/demo/projects/api-server", sessionCount: 2, lastActive: days(1) },
-  { name: "dotfiles", path: "/Users/demo/.dotfiles", sessionCount: 2, lastActive: days(1) },
-  { name: "infra", path: "/Users/demo/projects/infra", sessionCount: 1, lastActive: days(3) },
-];
+export const demoProjects: ProjectSummary[] = groupByProject(demoSessions);
 
 export const demoBookmarkedIds = new Set<string>();
 
