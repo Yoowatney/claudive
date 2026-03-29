@@ -1,5 +1,5 @@
 import { execSync, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
@@ -33,7 +33,7 @@ function detectMode(): LaunchMode {
 function saveConfig(config: Config): void {
   const dir = join(homedir(), ".config", "claudash");
   try {
-    execSync(`mkdir -p "${dir}"`);
+    mkdirSync(dir, { recursive: true });
     writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
   } catch {
     // ignore
