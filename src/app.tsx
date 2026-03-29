@@ -271,11 +271,9 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     }
   };
 
-  const handleCursorChange = (cursorIdx: number) => {
+  const handleCursorChange = (cursorIdx: number, session: Session) => {
     setSessionCursor(cursorIdx);
-    if (filteredSessions[cursorIdx]) {
-      setSelectedSession(filteredSessions[cursorIdx]);
-    }
+    setSelectedSession(session);
   };
 
   const handleProjectSelect = (project: ProjectSummary) => {
