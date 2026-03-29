@@ -51,6 +51,8 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [sessionCursor, setSessionCursor] = useState(0);
+  const [launchingSession, setLaunchingSession] = useState<Session | null>(null);
+  const [spinFrame, setSpinFrame] = useState(0);
 
   useEffect(() => {
     if (demo) {
@@ -236,25 +238,37 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     }
   });
 
-  const handleSelect = (session: Session) => {
-    if (demo) {
+  const spinChars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
+  useEffect(() => {
+    if (!launchingSession) return;
+    const spin = setInterval(() => {
+      setSpinFrame((f) => (f + 1) % spinChars.length);
+    }, 80);
+    const launch = setTimeout(() => {
       exit();
       setTimeout(() => {
-        const shortId = session.id.slice(0, 8);
-        process.stdout.write(`\x1b[2J\x1b[H`); // clear screen
-        process.stdout.write(`\n\x1b[1m  Claude Code\x1b[0m\n\n`);
-        process.stdout.write(`  \x1b[36mResuming session ${shortId}...\x1b[0m\n`);
-        process.stdout.write(`  \x1b[2m${session.projectPath}\x1b[0m\n\n`);
-        process.stdout.write(`  \x1b[33m>\x1b[0m ${session.firstMessage}\n\n`);
-        process.stdout.write(`  \x1b[2mClaude is thinking...\x1b[0m\n`);
-        setTimeout(() => process.exit(0), 3000);
+        if (demo) {
+          const shortId = launchingSession.id.slice(0, 8);
+          process.stdout.write(`\x1b[2J\x1b[H`);
+          process.stdout.write(`\n\x1b[1m  Claude Code\x1b[0m\n\n`);
+          process.stdout.write(`  \x1b[36mResuming session ${shortId}...\x1b[0m\n`);
+          process.stdout.write(`  \x1b[2m${launchingSession.projectPath}\x1b[0m\n\n`);
+          process.stdout.write(`  \x1b[33m>\x1b[0m ${launchingSession.firstMessage}\n\n`);
+          process.stdout.write(`  \x1b[2mClaude is thinking...\x1b[0m\n`);
+          setTimeout(() => process.exit(0), 3000);
+        } else {
+          resumeSession(launchingSession.id, launchingSession.projectPath);
+        }
       }, 100);
-      return;
+    }, 500);
+    return () => { clearInterval(spin); clearTimeout(launch); };
+  }, [launchingSession]);
+
+  const handleSelect = (session: Session) => {
+    if (!launchingSession) {
+      setLaunchingSession(session);
     }
-    exit();
-    setTimeout(() => {
-      resumeSession(session.id, session.projectPath);
-    }, 100);
   };
 
   const handleCursorChange = (cursorIdx: number) => {
@@ -292,6 +306,22 @@ export default function App({ version, updateInfo, demo }: AppProps) {
 
   if (showHelp) {
     return <Help onClose={() => setShowHelp(false)} />;
+  }
+
+  if (launchingSession) {
+    return (
+      <Box flexDirection="column" paddingTop={1}>
+        <Box>
+          <Text color="cyan" bold>
+            {spinChars[spinFrame]} Resuming session...
+          </Text>
+        </Box>
+        <Box marginTop={1}>
+          <Text dimColor>{launchingSession.project}</Text>
+          <Text dimColor> {launchingSession.id.slice(0, 8)}</Text>
+        </Box>
+      </Box>
+    );
   }
 
   if (showPreview && selectedSession) {
