@@ -272,13 +272,20 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     }
   });
 
-  const spinChars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+  const waveFrames = [
+    "~~~~~~~",
+    "~~≈~~~~",
+    "~≈~~≈~~",
+    "≈~~≈~~≈",
+    "~≈~~≈~~",
+    "~~≈~~~~",
+  ];
 
   useEffect(() => {
     if (!launchingSession) return;
     const spin = setInterval(() => {
-      setSpinFrame((f) => (f + 1) % spinChars.length);
-    }, 80);
+      setSpinFrame((f) => (f + 1) % waveFrames.length);
+    }, 150);
     const launch = setTimeout(() => {
       exit();
       setTimeout(() => {
@@ -286,7 +293,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           const shortId = launchingSession.id.slice(0, 8);
           process.stdout.write(`\x1b[2J\x1b[H`);
           process.stdout.write(`\n\x1b[1m  Claude Code\x1b[0m\n\n`);
-          process.stdout.write(`  \x1b[36mResuming session ${shortId}...\x1b[0m\n`);
+          process.stdout.write(`  \x1b[36m~≈~~≈~~ Diving into session ${shortId}...\x1b[0m\n`);
           process.stdout.write(`  \x1b[2m${launchingSession.projectPath}\x1b[0m\n\n`);
           process.stdout.write(`  \x1b[33m>\x1b[0m ${launchingSession.firstMessage}\n\n`);
           process.stdout.write(`  \x1b[2mClaude is thinking...\x1b[0m\n`);
@@ -327,7 +334,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   if (loading) {
     return (
       <Box>
-        <Text color="cyan">Scanning sessions...</Text>
+        <Text color="cyan">~~ Scanning sessions...</Text>
       </Box>
     );
   }
@@ -344,9 +351,8 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     return (
       <Box flexDirection="column" paddingTop={1}>
         <Box>
-          <Text color="cyan" bold>
-            {spinChars[spinFrame]} Resuming session...
-          </Text>
+          <Text color="cyan">{waveFrames[spinFrame]}</Text>
+          <Text color="cyan" bold> Diving into session...</Text>
         </Box>
         <Box marginTop={1}>
           <Text dimColor>{launchingSession.project}</Text>
