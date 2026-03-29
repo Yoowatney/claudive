@@ -350,13 +350,17 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   if (launchingSession) {
     return (
       <Box flexDirection="column" paddingTop={1}>
+        <Text color="cyan">{waveFrames[spinFrame].repeat(4)}</Text>
+        <Box marginTop={1}>
+          <Text> 🤿 </Text>
+          <Text color="cyan" bold>Diving into session...</Text>
+        </Box>
         <Box>
-          <Text color="cyan">{waveFrames[spinFrame]}</Text>
-          <Text color="cyan" bold> Diving into session...</Text>
+          <Text>    </Text>
+          <Text dimColor>{launchingSession.project} {launchingSession.id.slice(0, 8)}</Text>
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>{launchingSession.project}</Text>
-          <Text dimColor> {launchingSession.id.slice(0, 8)}</Text>
+          <Text color="cyan">{waveFrames[spinFrame].repeat(4)}</Text>
         </Box>
       </Box>
     );
