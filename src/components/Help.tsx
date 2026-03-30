@@ -3,6 +3,7 @@ import { getKeybindingsForView } from "../lib/keybindings.js";
 
 interface Props {
   onClose: () => void;
+  demoSubtitle?: string | null;
 }
 
 const VIEWS = ["sessions", "projects", "bookmarks", "preview"] as const;
@@ -13,7 +14,7 @@ const VIEW_LABELS: Record<(typeof VIEWS)[number], string> = {
   preview: "Preview",
 };
 
-export default function Help({ onClose }: Props) {
+export default function Help({ onClose, demoSubtitle }: Props) {
   useInput((input, key) => {
     if (key.escape || input === "?" || input === "q") {
       onClose();
@@ -67,6 +68,12 @@ export default function Help({ onClose }: Props) {
       <Box marginTop={1}>
         <Text dimColor>[?/Esc] close help</Text>
       </Box>
+
+      {demoSubtitle && (
+        <Box marginTop={1} justifyContent="center">
+          <Text color="yellow" bold>{demoSubtitle}</Text>
+        </Box>
+      )}
     </Box>
   );
 }

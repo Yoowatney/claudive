@@ -5,3 +5,6 @@ dist/
 docs/
 *.cast
 frames/
+frames_vhs/
+demo_test.*
+demo/*.cast

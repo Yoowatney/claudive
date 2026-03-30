@@ -8,7 +8,7 @@ Browse, search, preview, and resume your Claude Code sessions across **all proje
 
 [English](README.md) | [한국어](README.ko.md)
 
-<img src="demo.gif" alt="claudive demo" width="600">
+<img src="demo/demo.gif" alt="claudive demo" width="600">
 
 ## Features
 

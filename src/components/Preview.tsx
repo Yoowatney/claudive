@@ -9,6 +9,7 @@ interface Props {
   onClose: () => void;
   onSelect?: (session: Session) => void;
   demoData?: PreviewMessage[];
+  demoSubtitle?: string | null;
 }
 
 function wrapText(text: string, width: number): string[] {
@@ -62,7 +63,7 @@ function buildDisplayLines(
   return lines;
 }
 
-export default function Preview({ session, onClose, onSelect, demoData }: Props) {
+export default function Preview({ session, onClose, onSelect, demoData, demoSubtitle }: Props) {
   const [messages, setMessages] = useState<PreviewMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -161,6 +162,12 @@ export default function Preview({ session, onClose, onSelect, demoData }: Props)
           {scrollPct}% [j/k] line [u/d] page [g/G] top/bottom [Enter] resume [p/Esc] back
         </Text>
       </Box>
+
+      {demoSubtitle && (
+        <Box marginTop={1} justifyContent="center">
+          <Text color="yellow" bold>{demoSubtitle}</Text>
+        </Box>
+      )}
     </Box>
   );
 }

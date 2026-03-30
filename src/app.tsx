@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Box, Text, useApp, useInput } from "ink";
 import TextInput from "ink-text-input";
 import SessionList from "./components/SessionList.js";
@@ -21,6 +21,7 @@ import {
   demoBookmarkedIds,
   demoPreviewData,
 } from "./lib/demo.js";
+import { getSubtitle } from "./lib/demoSubtitles.js";
 import type { Session, ProjectSummary } from "./lib/scanner.js";
 
 type View = "sessions" | "projects" | "bookmarks";
@@ -58,14 +59,18 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   const [resumeMenuCursor, setResumeMenuCursor] = useState(0);
   const [animFrame, setAnimFrame] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
+  const [demoSubtitle, setDemoSubtitle] = useState<string | null>(null);
+  const demoStartRef = useRef(Date.now());
 
   useEffect(() => {
     if (demo) {
-      setSessions(demoSessions);
-      setProjects(demoProjects);
-      setBookmarkedIds(demoBookmarkedIds);
-      setLoading(false);
-      setSelectedSession(demoSessions[0]);
+      setTimeout(() => {
+        setSessions(demoSessions);
+        setProjects(demoProjects);
+        setBookmarkedIds(demoBookmarkedIds);
+        setLoading(false);
+        setSelectedSession(demoSessions[0]);
+      }, 1000);
       return;
     }
     setBookmarkedIds(getBookmarkedIds());
@@ -312,6 +317,16 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     "~~≈~~~~",
   ];
 
+  // Demo subtitle timer — starts when loading finishes
+  useEffect(() => {
+    if (!demo || loading) return;
+    demoStartRef.current = Date.now();
+    const timer = setInterval(() => {
+      setDemoSubtitle(getSubtitle(Date.now() - demoStartRef.current));
+    }, 200);
+    return () => clearInterval(timer);
+  }, [demo, loading]);
+
   // Wave animation for loading and launching
   useEffect(() => {
     if (!loading && !launchingSession) return;
@@ -381,6 +396,11 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           <Text> 🫧 </Text>
           <Text color="cyan">Scanning sessions...</Text>
         </Box>
+        {demo && (
+          <Box marginTop={1} justifyContent="center">
+            <Text color="yellow" bold>claude + dive = claudive</Text>
+          </Box>
+        )}
       </Box>
     );
   }
@@ -390,7 +410,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   }
 
   if (showHelp) {
-    return <Help onClose={() => setShowHelp(false)} />;
+    return <Help onClose={() => setShowHelp(false)} demoSubtitle={demo ? demoSubtitle : undefined} />;
   }
 
   if (showResumeMenu && selectedSession) {
@@ -416,6 +436,11 @@ export default function App({ version, updateInfo, demo }: AppProps) {
         <Box marginTop={1}>
           <Text dimColor>[j/k] select  [Enter] confirm  [Esc] cancel</Text>
         </Box>
+        {demo && demoSubtitle && (
+          <Box marginTop={1} justifyContent="center">
+            <Text color="yellow" bold>{demoSubtitle}</Text>
+          </Box>
+        )}
       </Box>
     );
   }
@@ -435,6 +460,11 @@ export default function App({ version, updateInfo, demo }: AppProps) {
         <Box marginTop={1}>
           <Text color="cyan">{waveFrames[animFrame].repeat(4)}</Text>
         </Box>
+        {demo && demoSubtitle && (
+          <Box marginTop={1} justifyContent="center">
+            <Text color="yellow" bold>{demoSubtitle}</Text>
+          </Box>
+        )}
       </Box>
     );
   }
@@ -446,6 +476,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
         onClose={() => setShowPreview(false)}
         onSelect={handleSelect}
         demoData={demo ? demoPreviewData[selectedSession.id] : undefined}
+        demoSubtitle={demo ? demoSubtitle : undefined}
       />
     );
   }
@@ -557,6 +588,13 @@ export default function App({ version, updateInfo, demo }: AppProps) {
               : getFooterText(view as "sessions" | "projects" | "bookmarks")}
         </Text>
       </Box>
+
+      {/* Demo subtitle */}
+      {demo && demoSubtitle && (
+        <Box marginTop={1} justifyContent="center">
+          <Text color="yellow" bold>{demoSubtitle}</Text>
+        </Box>
+      )}
     </Box>
   );
 }

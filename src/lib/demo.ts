@@ -90,7 +90,10 @@ export const demoSessions: Session[] = [
 
 export const demoProjects: ProjectSummary[] = groupByProject(demoSessions);
 
-export const demoBookmarkedIds = new Set<string>();
+export const demoBookmarkedIds = new Set<string>([
+  "a1b2c3d4-1111-4444-aaaa-111111111111",
+  "c3d4e5f6-3333-4444-cccc-333333333333",
+]);
 
 export const demoPreviewData: Record<string, PreviewMessage[]> = {
   "a1b2c3d4-1111-4444-aaaa-111111111111": [
