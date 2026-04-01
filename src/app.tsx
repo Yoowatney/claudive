@@ -559,7 +559,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           cursor={sessionCursor}
           onCursorChange={handleCursorChange}
           onSelect={handleSelect}
-          filter={filter}
+          searchMode={searchMode}
           bookmarkedIds={bookmarkedIds}
           sortOrder={sortOrder}
         />
@@ -572,7 +572,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           cursor={sessionCursor}
           onCursorChange={handleCursorChange}
           onSelect={handleSelect}
-          filter={filter}
+          searchMode={searchMode}
           bookmarkedIds={bookmarkedIds}
           sortOrder={sortOrder}
         />
