@@ -19,7 +19,14 @@ Published as npm package (`npx claudive`).
 - **Keybindings**: vim-style (j/k navigate, u/d page, g/G top/bottom)
 - **State management**: React useState only (no external state libs)
 - **Data source**: `~/.claude/projects/` JSONL files parsed directly
-- **Config storage**: `~/.config/claudash/config.json`
+- **Config storage**: `~/.config/claudive/config.json`
+
+## PR Checklist
+
+When modifying keybindings, UI features, or user-facing behavior:
+- Update `README.md` AND `README.ko.md` keybindings table
+- Update `src/lib/keybindings.ts` if new keys are added
+- Check if footer text needs updating
 
 ## Task Tracking
 

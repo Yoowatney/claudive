@@ -13,7 +13,7 @@ import {
   deleteSession,
 } from "./lib/scanner.js";
 import { resumeSession, type ResumeMode } from "./lib/launcher.js";
-import { toggleBookmark, getBookmarkedIds } from "./lib/bookmarks.js";
+import { toggleBookmark, getBookmarkedIds, setBookmarkLabel, getBookmarkLabels } from "./lib/bookmarks.js";
 import { getFooterText } from "./lib/keybindings.js";
 import {
   demoSessions,
@@ -59,6 +59,9 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   const [resumeMenuCursor, setResumeMenuCursor] = useState(0);
   const [animFrame, setAnimFrame] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
+  const [bookmarkLabels, setBookmarkLabels] = useState<Record<string, string>>({});
+  const [labelInput, setLabelInput] = useState(false);
+  const [labelText, setLabelText] = useState("");
   const [demoSubtitle, setDemoSubtitle] = useState<string | null>(null);
   const demoStartRef = useRef(Date.now());
   const suppressInputRef = useRef(false);
@@ -75,6 +78,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
       return;
     }
     setBookmarkedIds(getBookmarkedIds());
+    setBookmarkLabels(getBookmarkLabels());
     scanSessions().then((result) => {
       setSessions(result);
       setProjects(groupByProject(result));
@@ -170,6 +174,27 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   ];
 
   useInput((input, key) => {
+    if (labelInput) {
+      if (key.return) {
+        if (selectedSession && !demo) {
+          setBookmarkLabel(selectedSession.id, labelText);
+          setBookmarkLabels(getBookmarkLabels());
+        }
+        setLabelInput(false);
+        setLabelText("");
+      }
+      if (key.escape) {
+        setLabelInput(false);
+        setLabelText("");
+      }
+      if (key.ctrl && input === "u") {
+        setLabelText("");
+        suppressInputRef.current = true;
+        setTimeout(() => { suppressInputRef.current = false; }, 100);
+      }
+      return;
+    }
+
     if (showResumeMenu) {
       if (key.escape) {
         setShowResumeMenu(false);
@@ -306,10 +331,12 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           return next;
         });
       } else {
+        const wasBookmarked = bookmarkedIds.has(selectedSession.id);
         toggleBookmark(selectedSession.id);
         const newIds = getBookmarkedIds();
         setBookmarkedIds(newIds);
-        if (view === "bookmarks") {
+        setBookmarkLabels(getBookmarkLabels());
+        if (view === "bookmarks" && wasBookmarked) {
           const newList = sessions.filter((s) => newIds.has(s.id));
           const newIdx = Math.min(sessionCursor, newList.length - 1);
           if (newIdx >= 0) {
@@ -319,6 +346,18 @@ export default function App({ version, updateInfo, demo }: AppProps) {
             setSelectedSession(null);
           }
         }
+      }
+    }
+    if (
+      input === "r" &&
+      selectedSession &&
+      bookmarkedIds.has(selectedSession.id) &&
+      currentViewSessions.length > 0 &&
+      (view === "sessions" || view === "bookmarks")
+    ) {
+      if (!demo) {
+        setLabelInput(true);
+        setLabelText(bookmarkLabels[selectedSession.id] || "");
       }
     }
     if (
@@ -576,7 +615,9 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           onSelect={handleSelect}
           searchMode={searchMode}
           bookmarkedIds={bookmarkedIds}
+          bookmarkLabels={bookmarkLabels}
           sortOrder={sortOrder}
+          active={!labelInput && !confirmDelete && !showResumeMenu}
         />
       )}
 
@@ -589,7 +630,9 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           onSelect={handleSelect}
           searchMode={searchMode}
           bookmarkedIds={bookmarkedIds}
+          bookmarkLabels={bookmarkLabels}
           sortOrder={sortOrder}
+          active={!labelInput && !confirmDelete && !showResumeMenu}
         />
       )}
 
@@ -606,6 +649,18 @@ export default function App({ version, updateInfo, demo }: AppProps) {
         </Box>
       )}
 
+      {/* Bookmark label input */}
+      {labelInput && selectedSession && (
+        <Box marginTop={1}>
+          <Text color="yellow">Label: </Text>
+          <TextInput value={labelText} onChange={(val) => {
+            if (!suppressInputRef.current) {
+              setLabelText(val);
+            }
+          }} placeholder="optional — Enter to skip" />
+        </Box>
+      )}
+
       {/* Delete confirmation */}
       {confirmDelete && selectedSession && (
         <Box marginTop={1}>
@@ -618,13 +673,15 @@ export default function App({ version, updateInfo, demo }: AppProps) {
       {/* Footer */}
       <Box marginTop={1}>
         <Text dimColor>
-          {confirmDelete
-            ? "[y] confirm delete  [n/any] cancel"
-            : searchMode
-              ? "[Tab] browse results  [Esc] cancel"
-              : filter
-                ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
-                : getFooterText(view as "sessions" | "projects" | "bookmarks")}
+          {labelInput
+            ? "[Enter] save label  [Esc] cancel"
+            : confirmDelete
+              ? "[y] confirm delete  [n/any] cancel"
+              : searchMode
+                ? "[Tab] browse results  [Esc] cancel"
+                : filter
+                  ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
+                  : getFooterText(view as "sessions" | "projects" | "bookmarks") + (view === "bookmarks" ? "  [r] Label" : "")}
         </Text>
       </Box>
 

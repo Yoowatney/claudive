@@ -44,6 +44,7 @@ claudive
 | `p` | Preview conversation |
 | `o` | Sort: recent ↔ messages |
 | `b` | Toggle bookmark |
+| `r` | Add/edit bookmark label |
 | `d` | Delete session (with confirmation) |
 | `/` | Search (titles + conversation content) |
 | `Tab` | In search: browse results / In list: next view |
