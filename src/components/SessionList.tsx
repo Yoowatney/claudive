@@ -7,7 +7,7 @@ interface Props {
   cursor: number;
   onCursorChange: (cursor: number, session: Session) => void;
   onSelect: (session: Session) => void;
-  filter: string;
+  searchMode: boolean;
   bookmarkedIds: Set<string>;
   sortOrder?: "recent" | "messages";
 }
@@ -31,7 +31,7 @@ export default function SessionList({
   cursor,
   onCursorChange,
   onSelect,
-  filter,
+  searchMode,
   bookmarkedIds,
   sortOrder = "recent",
 }: Props) {
@@ -44,11 +44,11 @@ export default function SessionList({
   }, [sessions.length]);
 
   useInput((input, key) => {
-    if (key.upArrow || (input === "k" && !filter)) {
+    if (key.upArrow || (input === "k" && !searchMode)) {
       const newIdx = Math.max(0, cursor - 1);
       onCursorChange(newIdx, sessions[newIdx]);
     }
-    if (key.downArrow || (input === "j" && !filter)) {
+    if (key.downArrow || (input === "j" && !searchMode)) {
       const newIdx = Math.min(sessions.length - 1, cursor + 1);
       onCursorChange(newIdx, sessions[newIdx]);
     }
