@@ -612,6 +612,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           bookmarkedIds={bookmarkedIds}
           bookmarkLabels={bookmarkLabels}
           sortOrder={sortOrder}
+          active={!labelInput && !confirmDelete && !showResumeMenu}
         />
       )}
 
@@ -626,6 +627,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           bookmarkedIds={bookmarkedIds}
           bookmarkLabels={bookmarkLabels}
           sortOrder={sortOrder}
+          active={!labelInput && !confirmDelete && !showResumeMenu}
         />
       )}
 

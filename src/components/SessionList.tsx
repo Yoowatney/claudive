@@ -11,6 +11,7 @@ interface Props {
   bookmarkedIds: Set<string>;
   bookmarkLabels?: Record<string, string>;
   sortOrder?: "recent" | "messages";
+  active?: boolean;
 }
 
 function timeAgo(date: Date): string {
@@ -35,6 +36,7 @@ export default function SessionList({
   searchMode,
   bookmarkedIds,
   bookmarkLabels = {},
+  active = true,
   sortOrder = "recent",
 }: Props) {
   // Clamp cursor if sessions shrink (e.g. after delete)
@@ -46,6 +48,7 @@ export default function SessionList({
   }, [sessions.length]);
 
   useInput((input, key) => {
+    if (!active) return;
     if (key.upArrow || (input === "k" && !searchMode)) {
       const newIdx = Math.max(0, cursor - 1);
       onCursorChange(newIdx, sessions[newIdx]);
