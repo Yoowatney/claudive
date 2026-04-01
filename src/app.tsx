@@ -139,12 +139,27 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   }, [sessions, projectFilter, filter, contentMatchIds, sortOrder]);
 
   const bookmarkedSessions = useMemo(() => {
-    const result = sessions.filter((s) => bookmarkedIds.has(s.id));
+    let result = sessions.filter((s) => bookmarkedIds.has(s.id));
+    if (filter.trim()) {
+      const q = filter.toLowerCase();
+      result = result.filter((s) => {
+        if (
+          s.project.toLowerCase().includes(q) ||
+          s.firstMessage.toLowerCase().includes(q)
+        ) {
+          return true;
+        }
+        if (contentMatchIds?.has(s.id)) {
+          return true;
+        }
+        return false;
+      });
+    }
     if (sortOrder === "messages") {
       result.sort((a, b) => b.messageCount - a.messageCount);
     }
     return result;
-  }, [sessions, bookmarkedIds, sortOrder]);
+  }, [sessions, bookmarkedIds, filter, contentMatchIds, sortOrder]);
 
   const currentViewSessions = view === "bookmarks" ? bookmarkedSessions : filteredSessions;
 
