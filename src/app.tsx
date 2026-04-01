@@ -61,6 +61,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [demoSubtitle, setDemoSubtitle] = useState<string | null>(null);
   const demoStartRef = useRef(Date.now());
+  const suppressInputRef = useRef(false);
 
   useEffect(() => {
     if (demo) {
@@ -177,10 +178,24 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     }
 
     if (searchMode) {
+      if (key.tab) {
+        setSearchMode(false);
+        // Keep filter active — user can browse results with j/k and p
+        return;
+      }
       if (key.escape) {
         setSearchMode(false);
         setFilter("");
         setContentMatchIds(null);
+      }
+      // Block ctrl key combos in search mode (e.g. ctrl+u from cmd+backspace)
+      if (key.ctrl) {
+        if (input === "u") {
+          setFilter("");
+          suppressInputRef.current = true;
+          setTimeout(() => { suppressInputRef.current = false; }, 100);
+        }
+        return;
       }
       return;
     }
@@ -225,7 +240,10 @@ export default function App({ version, updateInfo, demo }: AppProps) {
     }
 
     if (input === "q" || key.escape) {
-      if (projectFilter && view === "sessions") {
+      if (filter) {
+        setFilter("");
+        setContentMatchIds(null);
+      } else if (projectFilter && view === "sessions") {
         setProjectFilter(null);
       } else {
         exit();
@@ -564,7 +582,11 @@ export default function App({ version, updateInfo, demo }: AppProps) {
       {searchMode && (
         <Box marginTop={1}>
           <Text color="yellow">/</Text>
-          <TextInput value={filter} onChange={setFilter} />
+          <TextInput value={filter} onChange={(val) => {
+            if (!suppressInputRef.current) {
+              setFilter(val);
+            }
+          }} />
           {searching && <Text color="gray"> searching...</Text>}
         </Box>
       )}
@@ -584,8 +606,10 @@ export default function App({ version, updateInfo, demo }: AppProps) {
           {confirmDelete
             ? "[y] confirm delete  [n/any] cancel"
             : searchMode
-              ? "[Esc] cancel  (searches titles + conversation content)"
-              : getFooterText(view as "sessions" | "projects" | "bookmarks")}
+              ? "[Tab] browse results  [Esc] cancel"
+              : filter
+                ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
+                : getFooterText(view as "sessions" | "projects" | "bookmarks")}
         </Text>
       </Box>
 
