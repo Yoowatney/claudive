@@ -331,13 +331,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
         const newIds = getBookmarkedIds();
         setBookmarkedIds(newIds);
         setBookmarkLabels(getBookmarkLabels());
-        if (!wasBookmarked) {
-          // Just bookmarked — prompt for label
-          setLabelInput(true);
-          setLabelText("");
-        }
         if (view === "bookmarks" && wasBookmarked) {
-          // Unbookmarked in bookmarks view — update cursor
           const newList = sessions.filter((s) => newIds.has(s.id));
           const newIdx = Math.min(sessionCursor, newList.length - 1);
           if (newIdx >= 0) {
@@ -347,6 +341,18 @@ export default function App({ version, updateInfo, demo }: AppProps) {
             setSelectedSession(null);
           }
         }
+      }
+    }
+    if (
+      input === "r" &&
+      selectedSession &&
+      bookmarkedIds.has(selectedSession.id) &&
+      currentViewSessions.length > 0 &&
+      (view === "sessions" || view === "bookmarks")
+    ) {
+      if (!demo) {
+        setLabelInput(true);
+        setLabelText(bookmarkLabels[selectedSession.id] || "");
       }
     }
     if (
@@ -656,13 +662,15 @@ export default function App({ version, updateInfo, demo }: AppProps) {
       {/* Footer */}
       <Box marginTop={1}>
         <Text dimColor>
-          {confirmDelete
-            ? "[y] confirm delete  [n/any] cancel"
-            : searchMode
-              ? "[Tab] browse results  [Esc] cancel"
-              : filter
-                ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
-                : getFooterText(view as "sessions" | "projects" | "bookmarks")}
+          {labelInput
+            ? "[Enter] save label  [Esc] cancel"
+            : confirmDelete
+              ? "[y] confirm delete  [n/any] cancel"
+              : searchMode
+                ? "[Tab] browse results  [Esc] cancel"
+                : filter
+                  ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
+                  : getFooterText(view as "sessions" | "projects" | "bookmarks")}
         </Text>
       </Box>
 
