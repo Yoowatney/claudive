@@ -681,7 +681,7 @@ export default function App({ version, updateInfo, demo }: AppProps) {
                 ? "[Tab] browse results  [Esc] cancel"
                 : filter
                   ? `/${filter}  [/] edit  [Esc] clear  [p] preview  [Enter] resume`
-                  : getFooterText(view as "sessions" | "projects" | "bookmarks")}
+                  : getFooterText(view as "sessions" | "projects" | "bookmarks") + (view === "bookmarks" ? "  [r] Label" : "")}
         </Text>
       </Box>
 
