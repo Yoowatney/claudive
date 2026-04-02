@@ -121,6 +121,7 @@ export interface SessionPreview {
 export async function getSessionPreview(
   sessionId: string,
   _project: string,
+  projectsDir = PROJECTS_DIR,
 ): Promise<SessionPreview> {
   const messages: PreviewMessage[] = [];
   const toolStats: ToolStats = {};
@@ -128,14 +129,14 @@ export async function getSessionPreview(
 
   let projectDirs: string[];
   try {
-    projectDirs = await readdir(PROJECTS_DIR);
+    projectDirs = await readdir(projectsDir);
   } catch {
     return { messages, toolStats, model };
   }
 
   // Search all project dirs for the session file by ID
   for (const projDir of projectDirs) {
-    const filePath = join(PROJECTS_DIR, projDir, `${sessionId}.jsonl`);
+    const filePath = join(projectsDir, projDir, `${sessionId}.jsonl`);
     try {
       const content = await readFile(filePath, "utf-8");
       for (const line of content.trim().split("\n")) {
@@ -241,18 +242,18 @@ export async function searchSessionContent(
   return matchingIds;
 }
 
-export async function scanSessions(): Promise<Session[]> {
+export async function scanSessions(projectsDir = PROJECTS_DIR): Promise<Session[]> {
   const sessions: Session[] = [];
 
   let projectDirs: string[];
   try {
-    projectDirs = await readdir(PROJECTS_DIR);
+    projectDirs = await readdir(projectsDir);
   } catch {
     return [];
   }
 
   for (const projDir of projectDirs) {
-    const projPath = join(PROJECTS_DIR, projDir);
+    const projPath = join(projectsDir, projDir);
     const projStat = await stat(projPath).catch(() => null);
     if (!projStat?.isDirectory()) continue;
 
@@ -318,10 +319,10 @@ export function groupByProject(sessions: Session[]): ProjectSummary[] {
     .sort((a, b) => b.sessionCount - a.sessionCount);
 }
 
-export async function deleteSession(session: Session): Promise<boolean> {
+export async function deleteSession(session: Session, projectsDir = PROJECTS_DIR): Promise<boolean> {
   let projectDirs: string[];
   try {
-    projectDirs = await readdir(PROJECTS_DIR);
+    projectDirs = await readdir(projectsDir);
   } catch {
     return false;
   }
@@ -330,7 +331,7 @@ export async function deleteSession(session: Session): Promise<boolean> {
 
   for (const projDir of projectDirs) {
     // Find session file by ID directly
-    const jsonlPath = join(PROJECTS_DIR, projDir, `${session.id}.jsonl`);
+    const jsonlPath = join(projectsDir, projDir, `${session.id}.jsonl`);
     try {
       await unlink(jsonlPath);
       deleted = true;

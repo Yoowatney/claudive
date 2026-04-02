@@ -120,8 +120,8 @@ function launchInline(sessionId: string, projectPath: string, mode: ResumeMode):
   try {
     process.chdir(resolved);
   } catch {
-    console.error(`\n  Directory not found: ${projectPath}`);
-    console.error(`  The worktree may have been deleted.\n`);
+    console.error(`\n  Directory not found: ${resolved}`);
+    console.error(`  Please check if the directory exists.\n`);
     return;
   }
   spawnSync("claude", buildArgs(sessionId, mode), { stdio: "inherit" });
