@@ -78,32 +78,46 @@ function extractText(content: unknown): string {
   return String(content);
 }
 
-async function parseFirstUserMessage(filePath: string): Promise<string> {
+interface ParseResult {
+  firstMessage: string;
+  cwd: string | null;
+}
+
+async function parseSessionMeta(filePath: string): Promise<ParseResult> {
   try {
     const content = await readFile(filePath, "utf-8");
     const lines = content.trim().split("\n");
+
+    let firstMessage = "(empty session)";
+    let cwd: string | null = null;
 
     for (const line of lines) {
       if (!line.trim()) continue;
       try {
         const msg = JSON.parse(line);
+        // Extract cwd from first user message
+        if (msg.cwd && !cwd) {
+          cwd = msg.cwd;
+        }
         // Claude Code format: type === "user" with message.content
-        if (msg.type === "user" && msg.message?.content) {
+        if (msg.type === "user" && msg.message?.content && firstMessage === "(empty session)") {
           const text = extractText(msg.message.content);
           const cleaned = text.replace(/\s+/g, " ").trim();
           if (cleaned) {
-            return cleaned.length > 100
+            firstMessage = cleaned.length > 100
               ? cleaned.slice(0, 100) + "..."
               : cleaned;
           }
         }
+        // Stop early once we have both
+        if (cwd && firstMessage !== "(empty session)") break;
       } catch {
         continue;
       }
     }
-    return "(empty session)";
+    return { firstMessage, cwd };
   } catch {
-    return "(unreadable)";
+    return { firstMessage: "(unreadable)", cwd: null };
   }
 }
 
@@ -266,19 +280,22 @@ export async function scanSessions(): Promise<Session[]> {
       const filePath = join(projPath, file);
       const sessionId = basename(file, ".jsonl");
 
-      const [firstMessage, messageCount, fileStat] = await Promise.all([
-        parseFirstUserMessage(filePath),
+      const [meta, messageCount, fileStat] = await Promise.all([
+        parseSessionMeta(filePath),
         countMessages(filePath),
         stat(filePath).catch(() => null),
       ]);
 
       if (messageCount === 0) continue;
 
+      // Use cwd from session file if available, fallback to decoded path
+      const projectPath = meta.cwd || decodeProjectPath(projDir);
+
       sessions.push({
         id: sessionId,
         project: projectDisplayName(projDir),
-        projectPath: decodeProjectPath(projDir),
-        firstMessage,
+        projectPath,
+        firstMessage: meta.firstMessage,
         messageCount,
         lastModified: fileStat?.mtime ?? new Date(0),
       });
