@@ -110,7 +110,7 @@ export interface PreviewMessage {
 
 export async function getSessionPreview(
   sessionId: string,
-  project: string,
+  _project: string,
 ): Promise<PreviewMessage[]> {
   const messages: PreviewMessage[] = [];
 
@@ -121,8 +121,8 @@ export async function getSessionPreview(
     return [];
   }
 
+  // Search all project dirs for the session file by ID
   for (const projDir of projectDirs) {
-    if (projectDisplayName(projDir) !== project) continue;
     const filePath = join(PROJECTS_DIR, projDir, `${sessionId}.jsonl`);
     try {
       const content = await readFile(filePath, "utf-8");
@@ -141,8 +141,9 @@ export async function getSessionPreview(
           continue;
         }
       }
+      if (messages.length > 0) return messages;
     } catch {
-      return [];
+      continue;
     }
   }
   return messages;
