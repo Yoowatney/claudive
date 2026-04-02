@@ -1,5 +1,4 @@
 import { readdir, readFile, stat, unlink, rm } from "node:fs/promises";
-import { statSync } from "node:fs";
 import { join, basename } from "node:path";
 import { homedir } from "node:os";
 
@@ -22,45 +21,9 @@ export interface ProjectSummary {
 const CLAUDE_DIR = join(homedir(), ".claude");
 const PROJECTS_DIR = join(CLAUDE_DIR, "projects");
 
-function decodeProjectPath(encoded: string): string {
-  // Claude Code encodes paths by replacing / with -
-  // Problem: directory names can contain dashes (e.g. "my-project")
-  // Solution: walk the filesystem to find the real path
-  const parts = encoded.replace(/^-/, "").split("-");
-  let resolved = "/";
-  let i = 0;
-
-  while (i < parts.length) {
-    // Try progressively longer segments joined with dashes
-    let found = false;
-    for (let j = parts.length; j > i; j--) {
-      const candidate = parts.slice(i, j).join("-");
-      const testPath = join(resolved, candidate);
-      try {
-        const s = statSync(testPath);
-        if (s.isDirectory()) {
-          resolved = testPath;
-          i = j;
-          found = true;
-          break;
-        }
-      } catch {
-        // not found, try shorter
-      }
-    }
-    if (!found) {
-      // Fallback: treat remaining parts as slash-separated
-      resolved = join(resolved, ...parts.slice(i));
-      break;
-    }
-  }
-  return resolved;
-}
-
-function projectDisplayName(encoded: string): string {
-  const decoded = decodeProjectPath(encoded);
-  const parts = decoded.split("/").filter(Boolean);
-  return parts[parts.length - 1] || encoded;
+function projectDisplayName(projectPath: string): string {
+  const parts = projectPath.split("/").filter(Boolean);
+  return parts[parts.length - 1] || projectPath;
 }
 
 function extractText(content: unknown): string {
@@ -78,32 +41,46 @@ function extractText(content: unknown): string {
   return String(content);
 }
 
-async function parseFirstUserMessage(filePath: string): Promise<string> {
+interface ParseResult {
+  firstMessage: string;
+  cwd: string | null;
+}
+
+async function parseSessionMeta(filePath: string): Promise<ParseResult> {
   try {
     const content = await readFile(filePath, "utf-8");
     const lines = content.trim().split("\n");
+
+    let firstMessage = "(empty session)";
+    let cwd: string | null = null;
 
     for (const line of lines) {
       if (!line.trim()) continue;
       try {
         const msg = JSON.parse(line);
+        // Extract cwd from first user message
+        if (msg.cwd && !cwd) {
+          cwd = msg.cwd;
+        }
         // Claude Code format: type === "user" with message.content
-        if (msg.type === "user" && msg.message?.content) {
+        if (msg.type === "user" && msg.message?.content && firstMessage === "(empty session)") {
           const text = extractText(msg.message.content);
           const cleaned = text.replace(/\s+/g, " ").trim();
           if (cleaned) {
-            return cleaned.length > 100
+            firstMessage = cleaned.length > 100
               ? cleaned.slice(0, 100) + "..."
               : cleaned;
           }
         }
+        // Stop early once we have both
+        if (cwd && firstMessage !== "(empty session)") break;
       } catch {
         continue;
       }
     }
-    return "(empty session)";
+    return { firstMessage, cwd };
   } catch {
-    return "(unreadable)";
+    return { firstMessage: "(unreadable)", cwd: null };
   }
 }
 
@@ -266,19 +243,23 @@ export async function scanSessions(): Promise<Session[]> {
       const filePath = join(projPath, file);
       const sessionId = basename(file, ".jsonl");
 
-      const [firstMessage, messageCount, fileStat] = await Promise.all([
-        parseFirstUserMessage(filePath),
+      const [meta, messageCount, fileStat] = await Promise.all([
+        parseSessionMeta(filePath),
         countMessages(filePath),
         stat(filePath).catch(() => null),
       ]);
 
       if (messageCount === 0) continue;
 
+      // Use cwd from session file — skip session if unavailable
+      if (!meta.cwd) continue;
+      const projectPath = meta.cwd;
+
       sessions.push({
         id: sessionId,
-        project: projectDisplayName(projDir),
-        projectPath: decodeProjectPath(projDir),
-        firstMessage,
+        project: projectDisplayName(projectPath),
+        projectPath,
+        firstMessage: meta.firstMessage,
         messageCount,
         lastModified: fileStat?.mtime ?? new Date(0),
       });
