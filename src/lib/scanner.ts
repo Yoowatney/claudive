@@ -108,17 +108,29 @@ export interface PreviewMessage {
   text: string;
 }
 
+export interface ToolStats {
+  [toolName: string]: number;
+}
+
+export interface SessionPreview {
+  messages: PreviewMessage[];
+  toolStats: ToolStats;
+  model: string | null;
+}
+
 export async function getSessionPreview(
   sessionId: string,
   _project: string,
-): Promise<PreviewMessage[]> {
+): Promise<SessionPreview> {
   const messages: PreviewMessage[] = [];
+  const toolStats: ToolStats = {};
+  let model: string | null = null;
 
   let projectDirs: string[];
   try {
     projectDirs = await readdir(PROJECTS_DIR);
   } catch {
-    return [];
+    return { messages, toolStats, model };
   }
 
   // Search all project dirs for the session file by ID
@@ -136,17 +148,30 @@ export async function getSessionPreview(
           } else if (msg.type === "assistant" && msg.message?.content) {
             const text = extractText(msg.message.content).trim();
             if (text) messages.push({ role: "assistant", text });
+            // Collect tool usage
+            const content = msg.message.content;
+            if (Array.isArray(content)) {
+              for (const block of content) {
+                if (block.type === "tool_use" && block.name) {
+                  toolStats[block.name] = (toolStats[block.name] || 0) + 1;
+                }
+              }
+            }
+            // Collect model
+            if (!model && msg.message.model) {
+              model = msg.message.model;
+            }
           }
         } catch {
           continue;
         }
       }
-      if (messages.length > 0) return messages;
+      if (messages.length > 0) return { messages, toolStats, model };
     } catch {
       continue;
     }
   }
-  return messages;
+  return { messages, toolStats, model };
 }
 
 export async function searchSessionContent(
@@ -304,9 +329,7 @@ export async function deleteSession(session: Session): Promise<boolean> {
   let deleted = false;
 
   for (const projDir of projectDirs) {
-    if (projectDisplayName(projDir) !== session.project) continue;
-
-    // Delete .jsonl file
+    // Find session file by ID directly
     const jsonlPath = join(PROJECTS_DIR, projDir, `${session.id}.jsonl`);
     try {
       await unlink(jsonlPath);
