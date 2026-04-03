@@ -47,5 +47,5 @@ export function useScrollable({ totalLines, maxVisible, onClose, onSelect, activ
       ? 100
       : Math.round((scroll / maxScroll) * 100);
 
-  return { scroll, scrollPct, resetScroll: () => setScroll(0) };
+  return { scroll, scrollPct, setScroll, resetScroll: () => setScroll(0) };
 }
