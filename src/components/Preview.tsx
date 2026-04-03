@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
+import TextInput from "ink-text-input";
 import { getSessionPreview, type ToolStats } from "../lib/scanner.js";
 import { useScrollable } from "../hooks/useScrollable.js";
 import type { Session, PreviewMessage } from "../lib/scanner.js";
@@ -102,6 +103,9 @@ export default function Preview({ session, onClose, onSelect, demoData, demoSubt
   const [toolStats, setToolStats] = useState<ToolStats>({});
   const [model, setModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [matchIndex, setMatchIndex] = useState(0);
 
   useEffect(() => {
     if (demoData) {
@@ -120,21 +124,75 @@ export default function Preview({ session, onClose, onSelect, demoData, demoSubt
 
   const termWidth = process.stdout.columns || 80;
   const termHeight = process.stdout.rows || 24;
-  const maxVisible = termHeight - 7;
+  const maxVisible = termHeight - 8;
 
   const displayLines = useMemo(
     () => buildDisplayLines(messages, termWidth - 4),
     [messages, termWidth],
   );
 
-  const { scroll, scrollPct } = useScrollable({
+  // Find matching line indices
+  const matchIndices = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return displayLines
+      .map((line, i) => (line.text.toLowerCase().includes(q) ? i : -1))
+      .filter((i) => i >= 0);
+  }, [displayLines, searchQuery]);
+
+  const { scroll, scrollPct, setScroll } = useScrollable({
     totalLines: displayLines.length,
     maxVisible,
     onClose,
     onSelect: onSelect ? () => onSelect(session) : undefined,
+    active: !searchMode,
+  });
+
+  // Jump to current match
+  useEffect(() => {
+    if (matchIndices.length > 0 && matchIndex < matchIndices.length) {
+      const targetLine = matchIndices[matchIndex];
+      setScroll(Math.max(0, targetLine - Math.floor(maxVisible / 2)));
+    }
+  }, [matchIndex, matchIndices]);
+
+  // Preview search input handler
+  useInput((input, key) => {
+    if (searchMode) {
+      if (key.return) {
+        setSearchMode(false);
+        // Keep query active for n/N navigation
+      }
+      if (key.escape) {
+        setSearchMode(false);
+        setSearchQuery("");
+        setMatchIndex(0);
+      }
+      if (key.ctrl && input === "u") {
+        setSearchQuery("");
+      }
+      return;
+    }
+
+    // Normal mode — / to enter search, n/N to navigate matches
+    if (input === "/") {
+      setSearchMode(true);
+      setSearchQuery("");
+      setMatchIndex(0);
+      return;
+    }
+    if (input === "n" && matchIndices.length > 0) {
+      setMatchIndex((i) => (i + 1) % matchIndices.length);
+      return;
+    }
+    if (input === "N" && matchIndices.length > 0) {
+      setMatchIndex((i) => (i - 1 + matchIndices.length) % matchIndices.length);
+      return;
+    }
   });
 
   const visible = displayLines.slice(scroll, scroll + maxVisible);
+  const matchSet = new Set(matchIndices);
 
   if (loading) {
     return (
@@ -166,9 +224,13 @@ export default function Preview({ session, onClose, onSelect, demoData, demoSubt
 
       <Box marginTop={1} flexDirection="column">
         {visible.map((line, i) => {
+          const globalIdx = scroll + i;
+          const isMatch = matchSet.has(globalIdx);
+          const isCurrentMatch = matchIndices[matchIndex] === globalIdx;
+
           if (line.role === "separator") {
             return (
-              <Text key={`sep-${scroll + i}`} dimColor>
+              <Text key={`sep-${globalIdx}`} dimColor>
                 {"─".repeat(Math.min(termWidth - 4, 60))}
               </Text>
             );
@@ -180,30 +242,56 @@ export default function Preview({ session, onClose, onSelect, demoData, demoSubt
               : "AI:  "
             : "     ";
 
+          // Highlight matching lines
+          const textColor = isCurrentMatch
+            ? "yellow"
+            : isMatch
+              ? "yellow"
+              : line.role === "user"
+                ? "green"
+                : "white";
+
           return (
-            <Box key={`${scroll + i}`}>
+            <Box key={`${globalIdx}`}>
               <Text
                 color={line.role === "user" ? "green" : "white"}
                 bold={line.role === "user" && line.isFirstLine}
-                dimColor={line.role === "assistant"}
+                dimColor={line.role === "assistant" && !isMatch}
               >
                 {prefix}
               </Text>
               <Text
-                color={line.role === "user" ? "green" : "white"}
+                color={textColor}
+                bold={isCurrentMatch}
                 wrap="wrap"
               >
                 {line.text}
               </Text>
+              {isCurrentMatch && <Text color="yellow"> ◀</Text>}
             </Box>
           );
         })}
       </Box>
 
+      {/* Search bar */}
+      {searchMode && (
+        <Box marginTop={1}>
+          <Text color="yellow">/</Text>
+          <TextInput value={searchQuery} onChange={setSearchQuery} />
+          {matchIndices.length > 0 && (
+            <Text dimColor> {matchIndex + 1}/{matchIndices.length}</Text>
+          )}
+        </Box>
+      )}
+
       {/* Footer */}
       <Box marginTop={1}>
         <Text dimColor>
-          {scrollPct}% [j/k] line [u/d] page [g/G] top/bottom [Enter] resume [p/Esc] back
+          {searchMode
+            ? "[Enter] confirm  [Esc] cancel"
+            : searchQuery
+              ? `/${searchQuery} ${matchIndex + 1}/${matchIndices.length}  [n/N] next/prev  [/] new search  [Esc] clear`
+              : `${scrollPct}% [j/k] line [u/d] page [g/G] top/bottom [/] search [Enter] resume [p/Esc] back`}
         </Text>
       </Box>
 
