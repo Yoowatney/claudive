@@ -1,5 +1,10 @@
 # claudive 🤿
 
+> [!WARNING]
+> **claudive is no longer maintained.**
+>
+> The last release still works, but it reads Claude Code's internal session files directly, so it may break with future updates.
+
 > **claude + dive = claudive**
 
 Dive into your [Claude Code](https://claude.ai/claude-code) sessions.
