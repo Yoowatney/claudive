@@ -1,5 +1,10 @@
 # claudive 🤿
 
+> [!WARNING]
+> **claudive는 더 이상 관리되지 않습니다.**
+>
+> 마지막 릴리스는 지금도 동작하지만, Claude Code 내부 세션 파일을 직접 읽기 때문에 이후 업데이트에서 깨질 수 있습니다.
+
 > **claude + dive = claudive**
 
 [Claude Code](https://claude.ai/claude-code) 세션 속으로 다이브.
